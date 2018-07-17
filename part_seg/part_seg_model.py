@@ -24,10 +24,11 @@ def get_model(point_cloud, input_label, is_training, cat_num, part_num, \
   nn_idx = tf_util.knn(adj, k=k)
   edge_feature = tf_util.get_edge_feature(input_image, nn_idx=nn_idx, k=k)
 
-  with tf.variable_scope('transform_net1') as sc:
-    transform = input_transform_net(edge_feature, is_training, bn_decay, K=3, is_dist=True)
-  point_cloud_transformed = tf.matmul(point_cloud, transform)
-  input_image = tf.expand_dims(point_cloud_transformed, -1)
+#  with tf.variable_scope('transform_net1') as sc:
+#    transform = input_transform_net(edge_feature, is_training, bn_decay, K=3, is_dist=True)
+#  point_cloud_transformed = tf.matmul(point_cloud, transform)
+#  input_image = tf.expand_dims(point_cloud_transformed, -1)
+  input_image = tf.expand_dims(point_cloud, -1)
   adj = tf_util.pairwise_distance(point_cloud_transformed)
   nn_idx = tf_util.knn(adj, k=k)
   edge_feature = tf_util.get_edge_feature(input_image, nn_idx=nn_idx, k=k)
