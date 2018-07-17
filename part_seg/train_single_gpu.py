@@ -17,8 +17,8 @@ import part_seg_model as model
 # DEFAULT SETTINGS
 parser = argparse.ArgumentParser()
 parser.add_argument('--num_gpu', type=int, default=1, help='The number of GPUs to use [default: 2]')
-parser.add_argument('--batch', type=int, default=4, help='Batch Size per GPU during training [default: 32]')
-parser.add_argument('--epoch', type=int, default=201, help='Epoch to run [default: 50]')
+parser.add_argument('--batch', type=int, default=16, help='Batch Size per GPU during training [default: 32]')
+parser.add_argument('--epoch', type=int, default=4, help='Epoch to run [default: 50]')
 parser.add_argument('--point_num', type=int, default=2048, help='Point Number [256/512/1024/2048]')
 parser.add_argument('--output_dir', type=str, default='train_results', help='Directory that stores all training logs and trained models')
 parser.add_argument('--wd', type=float, default=0, help='Weight Decay [Default: 0.0]')
@@ -273,7 +273,7 @@ def train():
           _, loss_val, per_instance_seg_loss_val, seg_pred_val, pred_seg_res \
               = sess.run([train_op, loss, per_instance_seg_loss, seg_pred, per_instance_seg_pred_res], \
               feed_dict=feed_dict)
-          per_instance_part_acc = np.mean(pred_seg_res == cur_seg[begidx_1: endidx_1, ...], axis=1)
+          per_instance_part_acc = np.mean(pred_seg_res == cur_seg[begidx_0: endidx_0, ...], axis=1)
           average_part_acc = np.mean(per_instance_part_acc)
           total_loss += loss_val
           total_seg_acc += average_part_acc
