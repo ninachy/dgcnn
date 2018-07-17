@@ -696,11 +696,13 @@ def get_edge_feature(point_cloud, nn_idx, k=20):
   idx_ = tf.range(batch_size) * num_points
   idx_ = tf.reshape(idx_, [batch_size, 1, 1]) 
 
-  point_cloud_flat = tf.reshape(point_cloud, [-1, num_dims])
-  point_cloud_neighbors = tf.gather(point_cloud_flat, nn_idx+idx_)
+  point_cloud_flat = tf.reshape(point_cloud, [-1, num_dims]) # size [batch_size*num_points, num_dims=3], extend the point list
+  point_cloud_neighbors = tf.gather(point_cloud_flat, nn_idx+idx_) # nn_idx+idx_ extends the counting number, act as indices
+  # point_cloud_neighbors [batch_size, num_points, k, num_dim], num_dim=3 as coordinates
   point_cloud_central = tf.expand_dims(point_cloud_central, axis=-2)
 
   point_cloud_central = tf.tile(point_cloud_central, [1, 1, k, 1])
 
-  edge_feature = tf.concat([point_cloud_central, point_cloud_neighbors-point_cloud_central], axis=-1)
+  edge_feature = tf.concat([point_cloud_central, point_cloud_neighbors-point_cloud_central], axis=-1) 
+  # becomes (batch_size, num_points, k, 6)? as combination of global (central) and local (neighbors-central)
   return edge_feature

@@ -61,7 +61,7 @@ BN_DECAY_DECAY_RATE = 0.5
 BN_DECAY_DECAY_STEP = float(DECAY_STEP * 2)
 BN_DECAY_CLIP = 0.99
 
-BASE_LEARNING_RATE = 0.003
+BASE_LEARNING_RATE = 0.001 # 0.003
 MOMENTUM = 0.9
 TRAINING_EPOCHES = FLAGS.epoch
 print('### Training epoch: {0}'.format(TRAINING_EPOCHES))
@@ -164,7 +164,7 @@ def train():
     is_training_phs =[]
 
     with tf.variable_scope(tf.get_variable_scope()):
-      for i in xrange(FLAGS.num_gpu):
+      for i in range(FLAGS.num_gpu):
         with tf.device('/gpu:%d' % i):
           with tf.name_scope('%s_%d' % (TOWER_NAME, i)) as scope:
             pointclouds_phs.append(tf.placeholder(tf.float32, shape=(batch_size, point_num, 3))) # for points
@@ -269,15 +269,12 @@ def train():
               is_training_phs[1]: is_training, 
               }
 
-
-          # train_op is for both gpus, and the others are for gpu_1
+	# train_op is for both gpus, and the others are for gpu_1
           _, loss_val, per_instance_seg_loss_val, seg_pred_val, pred_seg_res \
               = sess.run([train_op, loss, per_instance_seg_loss, seg_pred, per_instance_seg_pred_res], \
               feed_dict=feed_dict)
-
           per_instance_part_acc = np.mean(pred_seg_res == cur_seg[begidx_1: endidx_1, ...], axis=1)
           average_part_acc = np.mean(per_instance_part_acc)
-
           total_loss += loss_val
           total_seg_acc += average_part_acc
 

@@ -16,18 +16,18 @@ def get_model(point_cloud, input_label, is_training, cat_num, part_num, \
 
   batch_size = point_cloud.get_shape()[0].value
   num_point = point_cloud.get_shape()[1].value
-  input_image = tf.expand_dims(point_cloud, -1)
+  input_image = tf.expand_dims(point_cloud, -1) # extend to [batch_size, num_points, 3, 1]
 
-  k = 30
+  k = 30 
 
-  adj = tf_util.pairwise_distance(point_cloud)
-  nn_idx = tf_util.knn(adj, k=k)
-  edge_feature = tf_util.get_edge_feature(input_image, nn_idx=nn_idx, k=k)
+  adj = tf_util.pairwise_distance(point_cloud) # [batch_size, num_points, num_points] is the squared pointwise distance
+  nn_idx = tf_util.knn(adj, k=k) # [batch_size, num_points, k] index of kNN points
+  edge_feature = tf_util.get_edge_feature(input_image, nn_idx=nn_idx, k=k) # [batch_size, num_points, k, 3+3]
 
   with tf.variable_scope('transform_net1') as sc:
     transform = input_transform_net(edge_feature, is_training, bn_decay, K=3, is_dist=True)
   point_cloud_transformed = tf.matmul(point_cloud, transform)
-  input_image = tf.expand_dims(point_cloud_transformed, -1)
+  input_image = tf.expand_dims(point_cloud_transformed, -1) # [batch_size, num_points, 3, 1]
   adj = tf_util.pairwise_distance(point_cloud_transformed)
   nn_idx = tf_util.knn(adj, k=k)
   edge_feature = tf_util.get_edge_feature(input_image, nn_idx=nn_idx, k=k)

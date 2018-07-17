@@ -24,7 +24,7 @@ def input_transform_net(edge_feature, is_training, bn_decay=None, K=3, is_dist=F
              bn=True, is_training=is_training,
              scope='tconv2', bn_decay=bn_decay, is_dist=is_dist)
   
-  net = tf.reduce_max(net, axis=-2, keep_dims=True)
+  net = tf.reduce_max(net, axis=-2, keep_dims=True) # [batch_size, num_points, 1, 128]
   
   net = tf_util.conv2d(net, 1024, [1,1],
              padding='VALID', stride=[1,1],

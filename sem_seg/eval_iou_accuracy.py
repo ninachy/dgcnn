@@ -19,7 +19,7 @@ for i in range(num_room):
   pred_label = data_label[:,-1]
   gt_label = np.loadtxt(gt_label_filenames[i])
   print(gt_label.shape)
-  for j in xrange(gt_label.shape[0]):
+  for j in range(gt_label.shape[0]):
     gt_l = int(gt_label[j])
     pred_l = int(pred_label[j])
     gt_classes[gt_l] += 1
