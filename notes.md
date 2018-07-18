@@ -50,3 +50,10 @@ x structure of network is different from paper
 	x \square not always apply to the last layer
 	x concatenate all previous output
 	x concatenate the category label 	
+
+### 2018.7.18
+x worktree under test_nina
+    x change provider.py to omit download
+    x change train_multi_gpu.py the data loading directory
+x no_transform: delete transform network in part_seg_model.py
+x paper_architecture: change the network architecture in part_seg_model.py to match the paper
