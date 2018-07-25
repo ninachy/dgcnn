@@ -44,7 +44,7 @@ x structure of code for part_seg/train_multi_gpu
 		x eval_one_epoch
 
 Notice:
-x code can only run when num_gpu==2
+x code can only run when num_gpu==_2
 x structure of network is different from paper
 	x both max and mean for \square
 	x \square not always apply to the last layer
@@ -57,3 +57,8 @@ x worktree under test_nina
     x change train_multi_gpu.py the data loading directory
 x no_transform: delete transform network in part_seg_model.py
 x paper_architecture: change the network architecture in part_seg_model.py to match the paper
+x move_square: change the \squaer operator as the last operator in EdgeConv, just as paper stated
+x comparing results:
+    x no_transform: little decrease
+    x paper_architecutre: decrease a lot
+    x move_square: no difference

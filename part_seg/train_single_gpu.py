@@ -6,6 +6,7 @@ from datetime import datetime
 import json
 import os
 import sys
+import time
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 sys.path.append(os.path.dirname(BASE_DIR))
@@ -165,41 +166,40 @@ def train():
 
     with tf.variable_scope(tf.get_variable_scope()):
       for i in range(FLAGS.num_gpu):
-        with tf.device('/gpu:%d' % i):
-          with tf.name_scope('gpu') as scope:
-            pointclouds_phs.append(tf.placeholder(tf.float32, shape=(batch_size, point_num, 3))) # for points
-            input_label_phs.append(tf.placeholder(tf.float32, shape=(batch_size, NUM_CATEGORIES))) # for one-hot category label
-            seg_phs.append(tf.placeholder(tf.int32, shape=(batch_size, point_num))) # for part labels
-            is_training_phs.append(tf.placeholder(tf.bool, shape=()))
+        with tf.name_scope('gpu') as scope:
+          pointclouds_phs.append(tf.placeholder(tf.float32, shape=(batch_size, point_num, 3))) # for points
+          input_label_phs.append(tf.placeholder(tf.float32, shape=(batch_size, NUM_CATEGORIES))) # for one-hot category label
+          seg_phs.append(tf.placeholder(tf.int32, shape=(batch_size, point_num))) # for part labels
+          is_training_phs.append(tf.placeholder(tf.bool, shape=()))
 
-            seg_pred = model.get_model(pointclouds_phs[-1], input_label_phs[-1], \
-                is_training=is_training_phs[-1], bn_decay=bn_decay, cat_num=NUM_CATEGORIES, \
-                part_num=NUM_PART_CATS, batch_size=batch_size, num_point=point_num, weight_decay=FLAGS.wd)
+          seg_pred = model.get_model(pointclouds_phs[-1], input_label_phs[-1], \
+              is_training=is_training_phs[-1], bn_decay=bn_decay, cat_num=NUM_CATEGORIES, \
+              part_num=NUM_PART_CATS, batch_size=batch_size, num_point=point_num, weight_decay=FLAGS.wd)
 
 
-            loss, per_instance_seg_loss, per_instance_seg_pred_res  \
-              = model.get_loss(seg_pred, seg_phs[-1])
+          loss, per_instance_seg_loss, per_instance_seg_pred_res  \
+            = model.get_loss(seg_pred, seg_phs[-1])
 
-            total_training_loss_ph = tf.placeholder(tf.float32, shape=())
-            total_testing_loss_ph = tf.placeholder(tf.float32, shape=())
+          total_training_loss_ph = tf.placeholder(tf.float32, shape=())
+          total_testing_loss_ph = tf.placeholder(tf.float32, shape=())
 
-            seg_training_acc_ph = tf.placeholder(tf.float32, shape=())
-            seg_testing_acc_ph = tf.placeholder(tf.float32, shape=())
-            seg_testing_acc_avg_cat_ph = tf.placeholder(tf.float32, shape=())
+          seg_training_acc_ph = tf.placeholder(tf.float32, shape=())
+          seg_testing_acc_ph = tf.placeholder(tf.float32, shape=())
+          seg_testing_acc_avg_cat_ph = tf.placeholder(tf.float32, shape=())
 
-            total_train_loss_sum_op = tf.summary.scalar('total_training_loss', total_training_loss_ph)
-            total_test_loss_sum_op = tf.summary.scalar('total_testing_loss', total_testing_loss_ph)
+          total_train_loss_sum_op = tf.summary.scalar('total_training_loss', total_training_loss_ph)
+          total_test_loss_sum_op = tf.summary.scalar('total_testing_loss', total_testing_loss_ph)
 
-        
-            seg_train_acc_sum_op = tf.summary.scalar('seg_training_acc', seg_training_acc_ph)
-            seg_test_acc_sum_op = tf.summary.scalar('seg_testing_acc', seg_testing_acc_ph)
-            seg_test_acc_avg_cat_op = tf.summary.scalar('seg_testing_acc_avg_cat', seg_testing_acc_avg_cat_ph)
+      
+          seg_train_acc_sum_op = tf.summary.scalar('seg_training_acc', seg_training_acc_ph)
+          seg_test_acc_sum_op = tf.summary.scalar('seg_testing_acc', seg_testing_acc_ph)
+          seg_test_acc_avg_cat_op = tf.summary.scalar('seg_testing_acc_avg_cat', seg_testing_acc_avg_cat_ph)
 
-            tf.get_variable_scope().reuse_variables()
+          tf.get_variable_scope().reuse_variables()
 
-            grads = trainer.compute_gradients(loss)
+          grads = trainer.compute_gradients(loss)
 
-            # tower_grads.append(grads)
+          # tower_grads.append(grads)
 
     # grads = average_gradients(tower_grads)
 
@@ -234,6 +234,7 @@ def train():
     def train_one_epoch(train_file_idx, epoch_num):
       is_training = True
 
+      start_epoch = time.time()
       for i in range(num_train_file):
         cur_train_filename = os.path.join(hdf5_data_dir, train_file_list[train_file_idx[i]])
         printout(flog, 'Loading train file ' + cur_train_filename)
@@ -293,6 +294,10 @@ def train():
 
         printout(flog, '\tTraining Total Mean_loss: %f' % total_loss)
         printout(flog, '\t\tTraining Seg Accuracy: %f' % total_seg_acc)
+
+      end_epoch = time.time()
+        
+      print('one epoch uses %s time' %(time.strftime("%H:%M:%S", time.gmtime(end_epoch-start_epoch))))
 
     def eval_one_epoch(epoch_num):
       is_training = False
@@ -365,8 +370,8 @@ def train():
       os.mkdir(MODEL_STORAGE_PATH)
 
     for epoch in range(TRAINING_EPOCHES):
-      printout(flog, '\n<<< Testing on the test dataset ...')
-      eval_one_epoch(epoch)
+      #printout(flog, '\n<<< Testing on the test dataset ...')
+      #eval_one_epoch(epoch)
 
       printout(flog, '\n>>> Training for the epoch %d/%d ...' % (epoch, TRAINING_EPOCHES))
 
